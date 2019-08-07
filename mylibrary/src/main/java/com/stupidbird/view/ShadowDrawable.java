@@ -1,6 +1,4 @@
-package com.test.testapp.view;
-
-import com.test.testapp.R;
+package com.stupidbird.view;
 
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
