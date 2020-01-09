@@ -9,7 +9,7 @@
 2、app module build.gradle中添加依赖
 
 	dependencies {
-	        implementation 'com.github.zhangjianliang110:color-shadow_drawable:v1.0'
+	        implementation 'com.github.zhangjianliang110:color-shadow_drawable:v1.0.1'
 	}
 	
 3、Demo
