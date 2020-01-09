@@ -6,7 +6,8 @@
     android:gravity="center_horizontal"
     android:layout_width="match_parent"
     android:padding="10dp"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:orientation="vertical">
 
     <ImageView
         android:id="@+id/ivTest"
@@ -14,6 +15,16 @@
         android:layout_height="50dp"
         android:src="@mipmap/authordialog_bkg_1"
         android:scaleType="centerCrop"
+        />
+    <TextView
+        android:id="@+id/tvTest"
+        android:layout_width="200dp"
+        android:layout_height="50dp"
+        android:layout_marginTop="50dp"
+        android:background="@drawable/text_test_bg"
+        android:text="按钮"
+        android:textColor="@android:color/white"
+        android:gravity="center"
         />
 
 </LinearLayout>

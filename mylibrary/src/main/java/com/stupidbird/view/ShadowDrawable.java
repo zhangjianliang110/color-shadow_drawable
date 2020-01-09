@@ -51,12 +51,14 @@ import android.support.annotation.Nullable;
  */
 public class ShadowDrawable extends Drawable {
 
+    private static final float DEFAULT_SHADOW_MULTIPLIER = 1.5f;
+
     private final RectF mCornerRect = new RectF();
 
     // used to calculate content padding
     private static final double COS_45 = Math.cos(Math.toRadians(45));
 
-    private static final float SHADOW_MULTIPLIER = 1.5f;
+    private float mShadowMultiplier = DEFAULT_SHADOW_MULTIPLIER;
 
     private final int mInsetShadow; // extra shadow to avoid gaps between card and shadow
 
@@ -128,6 +130,10 @@ public class ShadowDrawable extends Drawable {
         mEdgeShadowPaint = new Paint(mCornerShadowPaint);
         mEdgeShadowPaint.setAntiAlias(false);
         setShadowSize(shadowSize, maxShadowSize);
+    }
+
+    public void setShadowMultiplier(float shadowMultiplier) {
+        mShadowMultiplier = shadowMultiplier;
     }
 
     private void setBackground(ColorStateList color) {
@@ -208,7 +214,7 @@ public class ShadowDrawable extends Drawable {
         }
         mRawShadowSize = shadowSize;
         mRawMaxShadowSize = maxShadowSize;
-        mShadowSize = (int) (shadowSize * SHADOW_MULTIPLIER + mInsetShadow + .5f);
+        mShadowSize = (int) (shadowSize * mShadowMultiplier + mInsetShadow + .5f);
         mDirty = true;
         invalidateSelf();
     }
@@ -225,9 +231,9 @@ public class ShadowDrawable extends Drawable {
 
     private float calculateVerticalPadding(float maxShadowSize, float cornerRadius, boolean addPaddingForCorners) {
         if (addPaddingForCorners) {
-            return (float) (maxShadowSize * SHADOW_MULTIPLIER + (1 - COS_45) * cornerRadius);
+            return (float) (maxShadowSize * mShadowMultiplier + (1 - COS_45) * cornerRadius);
         } else {
-            return maxShadowSize * SHADOW_MULTIPLIER;
+            return maxShadowSize * mShadowMultiplier;
         }
     }
 
@@ -307,7 +313,7 @@ public class ShadowDrawable extends Drawable {
         }
         canvas.translate(0, mRawShadowSize / 2);
         drawShadow(canvas);
-        canvas.translate(0, -mRawShadowSize / 2);
+        canvas.translate(0, 0);
         adaptDrawRoundRect(canvas, mCardBounds, mCornerRadius, mPaint);
     }
 
@@ -317,41 +323,40 @@ public class ShadowDrawable extends Drawable {
      * to draw efficient rounded rectangles before 17.
      */
     private void adaptDrawRoundRect(Canvas canvas, RectF bounds, float cornerRadius, Paint paint) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+        //if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+            bounds.set(bounds.left + cornerRadius, bounds.top, bounds.right - cornerRadius, bounds.bottom);
             canvas.drawRoundRect(bounds, cornerRadius, cornerRadius, paint);
-        } else {
-            final float twoRadius = cornerRadius * 2;
-            final float innerWidth = bounds.width() - twoRadius - 1;
-            final float innerHeight = bounds.height() - twoRadius - 1;
-            if (cornerRadius >= 1f) {
-                // increment corner radius to account for half pixels.
-                float roundedCornerRadius = cornerRadius + .5f;
-                mCornerRect.set(-roundedCornerRadius, -roundedCornerRadius, roundedCornerRadius,
-                        roundedCornerRadius);
-                int saved = canvas.save();
-                canvas.translate(bounds.left + roundedCornerRadius,
-                        bounds.top + roundedCornerRadius);
-                canvas.drawArc(mCornerRect, 180, 90, true, paint);
-                canvas.translate(innerWidth, 0);
-                canvas.rotate(90);
-                canvas.drawArc(mCornerRect, 180, 90, true, paint);
-                canvas.translate(innerHeight, 0);
-                canvas.rotate(90);
-                canvas.drawArc(mCornerRect, 180, 90, true, paint);
-                canvas.translate(innerWidth, 0);
-                canvas.rotate(90);
-                canvas.drawArc(mCornerRect, 180, 90, true, paint);
-                canvas.restoreToCount(saved);
-                //draw top and bottom pieces
-                canvas.drawRect(bounds.left + roundedCornerRadius - 1f, bounds.top,
-                        bounds.right - roundedCornerRadius + 1f, bounds.top + roundedCornerRadius, paint);
-
-                canvas.drawRect(bounds.left + roundedCornerRadius - 1f, bounds.bottom - roundedCornerRadius,
-                        bounds.right - roundedCornerRadius + 1f, bounds.bottom, paint);
-            }
-            // center
-            canvas.drawRect(bounds.left, bounds.top + cornerRadius, bounds.right, bounds.bottom - cornerRadius, paint);
-        }
+        //} else {
+        //    final float twoRadius = cornerRadius * 2;
+        //    final float innerWidth = bounds.width() - twoRadius - 1;
+        //    final float innerHeight = bounds.height() - twoRadius - 1;
+        //    if (cornerRadius >= 1f) {
+        //        // increment corner radius to account for half pixels.
+        //        float roundedCornerRadius = cornerRadius + .5f;
+        //        mCornerRect.set(-roundedCornerRadius, -roundedCornerRadius, roundedCornerRadius, roundedCornerRadius);
+        //        int saved = canvas.save();
+        //        canvas.translate(bounds.left + roundedCornerRadius, bounds.top + roundedCornerRadius);
+        //        canvas.drawArc(mCornerRect, 180, 90, true, paint);
+        //        canvas.translate(innerWidth, 0);
+        //        canvas.rotate(90);
+        //        canvas.drawArc(mCornerRect, 180, 90, true, paint);
+        //        canvas.translate(innerHeight, 0);
+        //        canvas.rotate(90);
+        //        canvas.drawArc(mCornerRect, 180, 90, true, paint);
+        //        canvas.translate(innerWidth, 0);
+        //        canvas.rotate(90);
+        //        canvas.drawArc(mCornerRect, 180, 90, true, paint);
+        //        canvas.restoreToCount(saved);
+        //        //draw top and bottom pieces
+        //        canvas.drawRect(bounds.left + roundedCornerRadius - 1f, bounds.top,
+        //                bounds.right - roundedCornerRadius + 1f, bounds.top + roundedCornerRadius, paint);
+        //
+        //        canvas.drawRect(bounds.left + roundedCornerRadius - 1f, bounds.bottom - roundedCornerRadius,
+        //                bounds.right - roundedCornerRadius + 1f, bounds.bottom, paint);
+        //    }
+        //    // center
+        //    canvas.drawRect(bounds.left, bounds.top + cornerRadius, bounds.right, bounds.bottom - cornerRadius, paint);
+        //}
     }
 
     private void drawShadow(Canvas canvas) {
@@ -391,7 +396,6 @@ public class ShadowDrawable extends Drawable {
         int saved = canvas.save();
         float left = 0;
         float right = mCardBounds.width() - 2 * inset - mLeftShadowDistance - mRightShadowDistance;
-        //float right = mCardBounds.width() - mCornerRadius - mShadowSize - mRightShadowDistance - mLeftShadowDistance;
         float realShadow = mCornerRadius + mShadowSize - inset;
         if (!hasLeftTopCorner()) {
             left = -realShadow;
@@ -400,7 +404,6 @@ public class ShadowDrawable extends Drawable {
             right += realShadow;
         }
         canvas.translate(mCardBounds.left + inset + mLeftShadowDistance, mCardBounds.top + mCornerRadius);
-        //canvas.translate(mCardBounds.left + inset + mLeftShadowDistance, mCardBounds.top + inset);
         canvas.drawRect(left, -mCornerRadius - mShadowSize, right, -mCornerRadius, mEdgeShadowPaint);
         canvas.restoreToCount(saved);
     }
@@ -699,20 +702,18 @@ public class ShadowDrawable extends Drawable {
         // we offset the content shadowSize/2 pixels up to make it more realistic.
         // this is why edge shadow shader has some extra space
         // When drawing bottom edge shadow, we use that extra space.
-        mEdgeShadowPaint.setShader(new LinearGradient(0, -mCornerRadius + mShadowSize, 0,
-                -mCornerRadius - mShadowSize,
+        mEdgeShadowPaint.setShader(new LinearGradient(0, -mCornerRadius + mShadowSize, 0, -mCornerRadius - mShadowSize,
                 new int[]{mShadowStartColor, mShadowStartColor, mShadowEndColor},
                 new float[]{0f, .5f, 1f}, Shader.TileMode.CLAMP));
         mEdgeShadowPaint.setAntiAlias(false);
     }
 
     private void buildComponents(Rect bounds) {
-        // Card is offset SHADOW_MULTIPLIER * maxShadowSize to account for the shadow shift.
+        // Card is offset mShadowMultiplier * maxShadowSize to account for the shadow shift.
         // We could have different top-bottom offsets to avoid extra gap above but in that case
         // center aligning Views inside the CardView would be problematic.
-        final float verticalOffset = mRawMaxShadowSize * SHADOW_MULTIPLIER;
-        mCardBounds.set(bounds.left + mRawMaxShadowSize, bounds.top + verticalOffset,
-                bounds.right - mRawMaxShadowSize, bounds.bottom - verticalOffset);
+        final float verticalOffset = mRawMaxShadowSize * mShadowMultiplier;
+        mCardBounds.set(bounds.left + mRawMaxShadowSize, bounds.top + verticalOffset, bounds.right - mRawMaxShadowSize, bounds.bottom - verticalOffset);
         if (mCornerRadius > mCardBounds.height() / 2) {
             mCornerRadius = mCardBounds.height() /2;
         }
@@ -751,8 +752,8 @@ public class ShadowDrawable extends Drawable {
 
     public float getMinHeight() {
         final float content = 2 * Math.max(mRawMaxShadowSize, mCornerRadius + mInsetShadow
-                + mRawMaxShadowSize * SHADOW_MULTIPLIER / 2);
-        return content + (mRawMaxShadowSize * SHADOW_MULTIPLIER + mInsetShadow) * 2;
+                + mRawMaxShadowSize * mShadowMultiplier / 2);
+        return content + (mRawMaxShadowSize * mShadowMultiplier + mInsetShadow) * 2;
     }
 
     public void setBackgroundColor(@ColorInt int color) {
